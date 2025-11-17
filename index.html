@@ -1,0 +1,1018 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Control de Horarios</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 0;
+            overflow-x: hidden;
+            touch-action: pan-x pan-y;
+        }
+
+        .container-fluid {
+            padding: 0;
+            max-width: 100vw;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 20px 15px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin: 0;
+            text-align: center;
+        }
+
+        .date-selector {
+            background: white;
+            padding: 20px 15px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .date-selector button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            color: white;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: transform 0.2s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .date-selector button:active {
+            transform: scale(0.95);
+        }
+
+        .date-display {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #2a5298;
+            cursor: pointer;
+            padding: 10px 15px;
+            border-radius: 10px;
+            transition: background 0.2s;
+            text-align: center;
+            min-width: 200px;
+        }
+
+        .date-display:hover {
+            background: #f0f0f0;
+        }
+
+        .content-section {
+            padding: 15px;
+        }
+
+        .section-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .section-title {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #667eea;
+        }
+
+        .section-title h2 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #2a5298;
+            margin: 0;
+        }
+
+        .btn-add {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            transition: transform 0.2s;
+        }
+
+        .btn-add:active {
+            transform: scale(0.95);
+        }
+
+        .schedule-item {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .schedule-header {
+            background: linear-gradient(135deg, #2a5298 0%, #1e3c72 100%);
+            color: white;
+            padding: 12px;
+            border-radius: 8px 8px 0 0;
+            font-weight: 700;
+            font-size: 0.95rem;
+            margin: -15px -15px 15px -15px;
+        }
+
+        .employee-row {
+            background: white;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .employee-name {
+            font-weight: 700;
+            color: #2a5298;
+            margin-bottom: 10px;
+            font-size: 1rem;
+        }
+
+        .days-container {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+            margin-bottom: 10px;
+            overflow-x: auto;
+        }
+
+        .day-cell {
+            text-align: center;
+            padding: 8px 4px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            min-width: 45px;
+        }
+
+        .day-header {
+            background: #667eea;
+            color: white;
+        }
+
+        .day-hours {
+            background: #4facfe;
+            color: white;
+            font-size: 0.7rem;
+        }
+
+        .day-cross {
+            background: #ff6b6b;
+            color: white;
+        }
+
+        .total-amount {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 2px solid #e0e0e0;
+        }
+
+        .total-label {
+            font-weight: 700;
+            color: #2a5298;
+            font-size: 0.85rem;
+        }
+
+        .total-value {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #11998e;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .btn-edit, .btn-delete {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            transition: transform 0.2s;
+        }
+
+        .btn-edit {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+        }
+
+        .btn-delete {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            color: white;
+        }
+
+        .btn-edit:active, .btn-delete:active {
+            transform: scale(0.95);
+        }
+
+        .form-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 1000;
+            overflow-y: auto;
+        }
+
+        .form-container {
+            background: white;
+            min-height: 100vh;
+            padding: 0;
+            max-width: 100%;
+            overflow-x: hidden;
+        }
+
+        .form-header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 20px 15px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .form-header h3 {
+            font-size: 1.2rem;
+            margin: 0;
+            font-weight: 700;
+        }
+
+        .form-body {
+            padding: 20px 15px;
+            padding-bottom: 100px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 700;
+            color: #2a5298;
+            margin-bottom: 8px;
+            font-size: 0.95rem;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .time-input-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .time-input-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+            gap: 5px;
+            min-width: 80px;
+        }
+
+        .time-input-wrapper > label {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: #2a5298;
+            margin-bottom: 2px;
+            text-align: center;
+        }
+
+        .time-input-wrapper input[type="time"] {
+            width: 100%;
+            padding: 8px 4px;
+            text-align: center;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .time-input-wrapper input[type="time"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .time-label {
+            font-size: 0.7rem;
+            color: #666;
+            margin-bottom: 2px;
+            text-align: center;
+        }
+
+        .form-actions {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            padding: 15px;
+            border-top: 2px solid #e0e0e0;
+            display: flex;
+            gap: 10px;
+            box-shadow: 0 -2px 4px rgba(0,0,0,0.1);
+            z-index: 101;
+        }
+
+        .btn-cancel, .btn-save {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .btn-cancel {
+            background: linear-gradient(135deg, #bdc3c7 0%, #95a5a6 100%);
+            color: white;
+        }
+
+        .btn-save {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+        }
+
+        .btn-cancel:active, .btn-save:active {
+            transform: scale(0.98);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #95a5a6;
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 15px;
+        }
+
+        input[type="date"] {
+            position: absolute;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .warning-modal, .confirm-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 1100;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .warning-content, .confirm-content {
+            background: white;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 400px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+
+        .warning-header {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ff8e8e 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .warning-header h3 {
+            margin: 0;
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+
+        .warning-body, .confirm-body {
+            padding: 20px;
+            text-align: center;
+            font-size: 1rem;
+            color: #333;
+        }
+
+        .warning-actions, .confirm-actions {
+            padding: 15px;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .btn-warning-ok {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ff8e8e 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .btn-warning-ok:active {
+            transform: scale(0.95);
+        }
+
+        .confirm-header {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .confirm-header h3 {
+            margin: 0;
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+
+        .btn-confirm-cancel {
+            background: linear-gradient(135deg, #bdc3c7 0%, #95a5a6 100%);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .btn-confirm-delete {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .btn-confirm-cancel:active, .btn-confirm-delete:active {
+            transform: scale(0.95);
+        }
+
+        .btn-delete-employee {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 10px;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            transition: transform 0.2s;
+        }
+
+        .btn-delete-employee:active {
+            transform: scale(0.95);
+        }
+
+        @media (max-width: 768px) {
+            .time-input-grid {
+                grid-template-columns: repeat(auto-fit, minmax(70px, 1fr));
+                gap: 8px;
+            }
+
+            .time-input-wrapper {
+                min-width: 70px;
+            }
+
+            .time-input-wrapper > label {
+                font-size: 0.75rem;
+            }
+
+            .time-input-wrapper input[type="time"] {
+                padding: 6px 2px;
+                font-size: 0.75rem;
+            }
+
+            .time-label {
+                font-size: 0.65rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="header">
+            <h1><i class="fas fa-clock"></i> Control de Horarios</h1>
+        </div>
+
+        <div class="date-selector">
+            <button onclick="changeWeek(-1)">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            <div class="date-display" onclick="showDatePicker()">
+                <span id="currentWeekRange">Cargando...</span>
+                <input type="date" id="datePicker" onchange="updateFromPicker()">
+            </div>
+            <button onclick="changeWeek(1)">
+                <i class="fas fa-chevron-right"></i>
+            </button>
+        </div>
+
+        <div class="content-section">
+            <div class="section-card">
+                <div class="section-title">
+                    <h2><i class="fas fa-money-bill-wave"></i> Horarios por Tarifa/Hora</h2>
+                    <button class="btn-add" onclick="openTarifaForm()">
+                        <i class="fas fa-plus"></i> Agregar
+                    </button>
+                </div>
+                <div id="tarifaContainer"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="form-overlay" id="tarifaFormOverlay">
+        <div class="form-container">
+            <div class="form-header">
+                <h3><i class="fas fa-money-bill-wave"></i> <span id="tarifaFormTitle">Agregar Horario por Tarifa/Hora</span></h3>
+            </div>
+            <div class="form-body">
+                <div class="form-group">
+                    <label for="tarifaActivacion">Zona de Trabajo</label>
+                    <input type="text" id="tarifaActivacion" placeholder="Ej: Cascada/Balneario">
+                </div>
+                <div class="form-group">
+                    <label>Empleados</label>
+                    <div id="tarifaEmpleadosContainer"></div>
+                    <button class="btn-add" style="margin-top: 10px; width: 100%;" onclick="addTarifaEmpleado()">
+                        <i class="fas fa-user-plus"></i> Agregar Empleado
+                    </button>
+                </div>
+            </div>
+            <div class="form-actions">
+                <button class="btn-cancel" onclick="closeTarifaForm()">
+                    <i class="fas fa-times"></i> Cancelar
+                </button>
+                <button class="btn-save" onclick="saveTarifa()">
+                    <i class="fas fa-save"></i> Guardar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="warning-modal" id="warningModal">
+        <div class="warning-content">
+            <div class="warning-header">
+                <h3><i class="fas fa-exclamation-triangle"></i> Advertencia</h3>
+            </div>
+            <div class="warning-body">
+                <p id="warningMessage">Por favor complete todos los campos obligatorios</p>
+            </div>
+            <div class="warning-actions">
+                <button class="btn-warning-ok" onclick="closeWarningModal()">
+                    <i class="fas fa-check"></i> Aceptar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="confirm-modal" id="confirmModal">
+        <div class="confirm-content">
+            <div class="confirm-header">
+                <h3><i class="fas fa-trash-alt"></i> Confirmar Eliminación</h3>
+            </div>
+            <div class="confirm-body">
+                <p id="confirmMessage">¿Está seguro de eliminar este horario?</p>
+            </div>
+            <div class="confirm-actions">
+                <button class="btn-confirm-cancel" onclick="closeConfirmModal()">
+                    <i class="fas fa-times"></i> Cancelar
+                </button>
+                <button class="btn-confirm-delete" onclick="confirmDelete()">
+                    <i class="fas fa-trash"></i> Eliminar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const DIAS_SEMANA = ['L', 'M', 'K', 'J', 'V', 'S', 'D'];
+        
+        let currentWeekStart = getMonday(new Date());
+        let tarifaData = loadData('tarifaData') || {};
+        let editingTarifaId = null;
+        let pendingDelete = { type: null, id: null, employeeElement: null };
+
+        function loadData(key) {
+            const data = localStorage.getItem(key);
+            return data ? JSON.parse(data) : {};
+        }
+
+        function saveData(key, data) {
+            localStorage.setItem(key, JSON.stringify(data));
+        }
+
+        function getMonday(date) {
+            const d = new Date(date);
+            const day = d.getDay();
+            const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+            return new Date(d.setDate(diff));
+        }
+
+        function getSunday(date) {
+            const monday = getMonday(date);
+            const sunday = new Date(monday);
+            sunday.setDate(monday.getDate() + 6);
+            return sunday;
+        }
+
+        function formatDate(date) {
+            return `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
+        }
+
+        function formatDateInput(date) {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+        function parseDateInput(dateStr) {
+            const [year, month, day] = dateStr.split('-');
+            return new Date(year, month - 1, day);
+        }
+
+        function changeWeek(weeks) {
+            currentWeekStart.setDate(currentWeekStart.getDate() + (weeks * 7));
+            updateWeekDisplay();
+            renderAll();
+        }
+
+        function showDatePicker() {
+            document.getElementById('datePicker').value = formatDateInput(currentWeekStart);
+            document.getElementById('datePicker').showPicker();
+        }
+
+        function updateFromPicker() {
+            const dateStr = document.getElementById('datePicker').value;
+            const selectedDate = parseDateInput(dateStr);
+            currentWeekStart = getMonday(selectedDate);
+            updateWeekDisplay();
+            renderAll();
+        }
+
+        function updateWeekDisplay() {
+            const weekEnd = getSunday(currentWeekStart);
+            document.getElementById('currentWeekRange').textContent = `${formatDate(currentWeekStart)} - ${formatDate(weekEnd)}`;
+        }
+
+        function showWarningModal(message) {
+            document.getElementById('warningMessage').textContent = message;
+            document.getElementById('warningModal').style.display = 'flex';
+        }
+
+        function closeWarningModal() {
+            document.getElementById('warningModal').style.display = 'none';
+        }
+
+        function showConfirmModal(type, id, employeeElement = null) {
+            pendingDelete.type = type;
+            pendingDelete.id = id;
+            pendingDelete.employeeElement = employeeElement;
+            
+            if (type === 'employee') {
+                document.getElementById('confirmMessage').textContent = '¿Está seguro de eliminar este empleado?';
+            } else {
+                document.getElementById('confirmMessage').textContent = '¿Está seguro de eliminar este horario?';
+            }
+            
+            document.getElementById('confirmModal').style.display = 'flex';
+        }
+
+        function closeConfirmModal() {
+            document.getElementById('confirmModal').style.display = 'none';
+            pendingDelete.type = null;
+            pendingDelete.id = null;
+            pendingDelete.employeeElement = null;
+        }
+
+        function confirmDelete() {
+            if (pendingDelete.type === 'tarifa') {
+                deleteTarifaConfirmed(pendingDelete.id);
+            } else if (pendingDelete.type === 'employee') {
+                deleteEmployeeConfirmed(pendingDelete.employeeElement);
+            }
+            closeConfirmModal();
+        }
+
+        function getWeekKey(date) {
+            return `week-${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
+        }
+
+        function calcularHorasTrabajadas(inicio, fin) {
+            if (!inicio || !fin) return 0;
+            const [horaInicio, minInicio] = inicio.split(':').map(Number);
+            const [horaFin, minFin] = fin.split(':').map(Number);
+            const minutosInicio = horaInicio * 60 + minInicio;
+            const minutosFin = horaFin * 60 + minFin;
+            let diferencia = minutosFin - minutosInicio;
+            if (diferencia < 0) diferencia += 24 * 60;
+            return diferencia / 60;
+        }
+
+        function openTarifaForm(id = null) {
+            editingTarifaId = id;
+            document.getElementById('tarifaFormTitle').textContent = id ? 'Editar Horario por Tarifa/Hora' : 'Agregar Horario por Tarifa/Hora';
+            const weekKey = getWeekKey(currentWeekStart);
+            
+            if (id && tarifaData[weekKey] && tarifaData[weekKey][id]) {
+                const data = tarifaData[weekKey][id];
+                document.getElementById('tarifaActivacion').value = data.activacion;
+                document.getElementById('tarifaEmpleadosContainer').innerHTML = '';
+                data.empleados.forEach(emp => addTarifaEmpleado(emp));
+            } else {
+                document.getElementById('tarifaActivacion').value = '';
+                document.getElementById('tarifaEmpleadosContainer').innerHTML = '';
+                addTarifaEmpleado();
+            }
+            document.getElementById('tarifaFormOverlay').style.display = 'block';
+        }
+
+        function closeTarifaForm() {
+            document.getElementById('tarifaFormOverlay').style.display = 'none';
+            editingTarifaId = null;
+        }
+
+        function confirmDeleteEmployee(button) {
+            const employeeElement = button.closest('.employee-row');
+            showConfirmModal('employee', null, employeeElement);
+        }
+
+        function deleteEmployeeConfirmed(employeeElement) {
+            if (employeeElement) {
+                employeeElement.remove();
+                
+                // Verificar si quedan empleados
+                const remainingEmployees = document.querySelectorAll('#tarifaEmpleadosContainer .employee-row');
+                if (remainingEmployees.length === 0) {
+                    // Si no quedan empleados, cerrar el formulario automáticamente
+                    closeTarifaForm();
+                }
+            }
+        }
+
+        function addTarifaEmpleado(data = null) {
+            const container = document.getElementById('tarifaEmpleadosContainer');
+            const empDiv = document.createElement('div');
+            empDiv.className = 'employee-row';
+            empDiv.style.marginBottom = '15px';
+            empDiv.innerHTML = `
+                <div class="form-group" style="margin-bottom: 10px;">
+                    <label>Nombre del Empleado</label>
+                    <input type="text" class="empleado-nombre" placeholder="Nombre" value="${data ? data.nombre : ''}">
+                </div>
+                <div class="form-group" style="margin-bottom: 10px;">
+                    <label>Tarifa por Hora (₡)</label>
+                    <input type="number" min="0" step="0.01" class="empleado-tarifa" placeholder="0.00" value="${data ? data.tarifa : ''}" inputmode="decimal">
+                </div>
+                <div class="form-group" style="margin-bottom: 10px;">
+                    <label>Extras (₡)</label>
+                    <input type="number" min="0" step="0.01" class="empleado-extras" placeholder="0.00" value="${data ? (data.extras || 0) : 0}" inputmode="decimal">
+                </div>
+                <div class="form-group">
+                    <label>Horarios por Día</label>
+                    <div class="time-input-grid">
+                        ${DIAS_SEMANA.map((dia, index) => `
+                            <div class="time-input-wrapper">
+                                <label>${dia}</label>
+                                <span class="time-label">Inicio</span>
+                                <input type="time" class="hora-inicio" data-day="${index}" value="${data && data.horarios[index] ? data.horarios[index].inicio : ''}">
+                                <span class="time-label">Fin</span>
+                                <input type="time" class="hora-fin" data-day="${index}" value="${data && data.horarios[index] ? data.horarios[index].fin : ''}">
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+                <button class="btn-delete-employee" onclick="confirmDeleteEmployee(this)">
+                    <i class="fas fa-trash"></i> Eliminar Empleado
+                </button>
+            `;
+            container.appendChild(empDiv);
+        }
+
+        function saveTarifa() {
+            const activacion = document.getElementById('tarifaActivacion').value.trim();
+            if (!activacion) {
+                showWarningModal('Por favor ingrese el nombre de la activación/empresa');
+                return;
+            }
+            
+            const empleadosElements = document.querySelectorAll('#tarifaEmpleadosContainer .employee-row');
+            const empleados = [];
+            
+            for (let empEl of empleadosElements) {
+                const nombre = empEl.querySelector('.empleado-nombre').value.trim();
+                const tarifaInput = empEl.querySelector('.empleado-tarifa').value;
+                const tarifa = parseFloat(tarifaInput);
+                const extrasInput = empEl.querySelector('.empleado-extras').value;
+                const extras = parseFloat(extrasInput) || 0;
+                
+                if (!nombre) continue;
+                
+                if (!tarifa || tarifa <= 0) {
+                    showWarningModal('Por favor ingrese una tarifa por hora válida para ' + nombre);
+                    return;
+                }
+                
+                const horarios = [];
+                const inicios = empEl.querySelectorAll('.hora-inicio');
+                const fines = empEl.querySelectorAll('.hora-fin');
+                
+                for (let i = 0; i < inicios.length; i++) {
+                    const inicio = inicios[i].value;
+                    const fin = fines[i].value;
+                    
+                    if ((inicio && !fin) || (!inicio && fin)) {
+                        showWarningModal(`Por favor complete ambos horarios (inicio y fin) para ${nombre} en el día ${DIAS_SEMANA[i]}`);
+                        return;
+                    }
+                    
+                    if (inicio && fin) {
+                        const horasTrabajadas = calcularHorasTrabajadas(inicio, fin);
+                        if (horasTrabajadas <= 0 || horasTrabajadas > 24) {
+                            showWarningModal(`El horario para ${nombre} en el día ${DIAS_SEMANA[i]} no es válido. Verifique que la hora de fin sea posterior a la hora de inicio.`);
+                            return;
+                        }
+                    }
+                    
+                    horarios.push({ inicio, fin });
+                }
+                
+                empleados.push({ nombre, tarifa, horarios, extras });
+            }
+            
+            if (empleados.length === 0) {
+                showWarningModal('Debe agregar al menos un empleado');
+                return;
+            }
+            
+            const weekKey = getWeekKey(currentWeekStart);
+            if (!tarifaData[weekKey]) tarifaData[weekKey] = {};
+            
+            const id = editingTarifaId || Date.now();
+            tarifaData[weekKey][id] = {
+                activacion,
+                empleados,
+                fechaInicio: formatDateInput(currentWeekStart),
+                fechaFin: formatDateInput(getSunday(currentWeekStart))
+            };
+            
+            saveData('tarifaData', tarifaData);
+            closeTarifaForm();
+            renderAll();
+        }
+
+        function deleteTarifa(id) {
+            showConfirmModal('tarifa', id);
+        }
+
+        function deleteTarifaConfirmed(id) {
+            const weekKey = getWeekKey(currentWeekStart);
+            delete tarifaData[weekKey][id];
+            saveData('tarifaData', tarifaData);
+            renderAll();
+        }
+
+        function renderTarifa() {
+            const container = document.getElementById('tarifaContainer');
+            const weekKey = getWeekKey(currentWeekStart);
+            const data = tarifaData[weekKey] || {};
+            
+            if (Object.keys(data).length === 0) {
+                container.innerHTML = `<div class="empty-state"><i class="fas fa-money-bill-wave"></i><p>No hay horarios registrados para esta semana</p></div>`;
+                return;
+            }
+            
+            container.innerHTML = Object.entries(data).map(([id, item]) => `
+                <div class="schedule-item">
+                    <div class="schedule-header">${item.activacion}<br><small style="font-size: 0.8rem; opacity: 0.9;">${item.fechaInicio} al ${item.fechaFin}</small></div>
+                    ${item.empleados.map(emp => {
+                        let totalHoras = 0;
+                        const horariosPorDia = emp.horarios.map(horario => {
+                            if (horario.inicio && horario.fin) {
+                                const horas = calcularHorasTrabajadas(horario.inicio, horario.fin);
+                                totalHoras += horas;
+                                return `${horario.inicio}-${horario.fin}`;
+                            }
+                            return '-';
+                        });
+                        const totalPorHoras = totalHoras * emp.tarifa;
+                        const total = totalPorHoras + (emp.extras || 0);
+                        return `
+                            <div class="employee-row">
+                                <div class="employee-name">${emp.nombre} - Tarifa: ₡${emp.tarifa.toLocaleString('es-CR')}/h</div>
+                                <div class="days-container">
+                                    ${DIAS_SEMANA.map(dia => `<div class="day-cell day-header">${dia}</div>`).join('')}
+                                    ${horariosPorDia.map(horario => {
+                                        const hasHours = horario !== '-';
+                                        return `<div class="day-cell ${hasHours ? 'day-hours' : 'day-cross'}" style="font-size: 0.65rem; padding: 4px 2px;">${horario}</div>`;
+                                    }).join('')}
+                                </div>
+                                <div class="total-amount">
+                                    <span class="total-label">Total horas: ${totalHoras.toFixed(2)}h | Extras: ₡${(emp.extras || 0).toLocaleString('es-CR')}</span>
+                                    <span class="total-value">₡${total.toLocaleString('es-CR')}</span>
+                                </div>
+                            </div>
+                        `;
+                    }).join('')}
+                    <div class="action-buttons">
+                        <button class="btn-edit" onclick="openTarifaForm('${id}')"><i class="fas fa-edit"></i> Editar</button>
+                        <button class="btn-delete" onclick="deleteTarifa('${id}')"><i class="fas fa-trash"></i> Eliminar</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderAll() {
+            renderTarifa();
+        }
+
+        updateWeekDisplay();
+        renderAll();
+    </script>
+</body>
+</html>
